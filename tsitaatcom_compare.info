@@ -1,0 +1,4 @@
+name = Tsitaat.com Compare
+description = Compare dev and old tsitaat.com important tag contents.
+core = 7.x
+package = Tsitaat.com

@@ -1,0 +1,82 @@
+<?php
+
+define('TSITAATCOM_COMPARE_WITH', 'http://www.tsitaat.com');
+
+/**
+ * Implements hook_menu().
+ */
+function tsitaatcom_compare_menu() {
+  $items = array();
+
+  $items['admin/tsitaatcom_compare'] = array(
+    'title' => 'Compare sites',
+    'page callback' => '_tsitaatcom_compare_page',
+    'access arguments' => array('access administration pages'),
+  );
+
+  return $items;
+}
+
+/**
+ * Admin/filter-phpbb-users page callback.
+ *
+ * 7549 hetkel viimane kasutaja.
+ */
+function _tsitaatcom_compare_page() {
+  $out = 'foo';
+  module_load_include('inc', 'tsitaatcom_compare', 'includes/selector');
+  $out = _tsitaatcom_crawl_and_compare();
+  return $out;
+}
+
+function _tsitaatcom_crawl_and_compare() {
+  global $base_url;
+  $out = '';
+
+  drupal_set_message("Add to .htaccess if script can't access url: AuthUserFile /var/www/tsitaat/dev/.htpasswd\nAuthType Basic\nAuthName \"Tsitaat Dev\\nRequire valid-user\nOrder allow,deny\nAllow from localhost\nAllow from 130.255.185.7\nSatisfy Any", 'status');
+
+  $urls = array(
+    '',
+    'tsitaadid/autorid/a/',
+    'tsitaadid/autorid/gunnar_aarma',
+    'tsitaadid/autorid/gunnar_aarma/11783',
+    'tsitaadid/autorid/johann_wolfgang_von_goethe',
+    'tsitaadid/autorid/winston_churchill',
+    'tsitaadid/teemad/a/',
+    'tsitaadid/teemad/aare',
+    'tsitaadid/top-100-tsitaadid',
+  );
+
+  $header = array(
+    'Drupal',
+    'www.tsitaat.com url',
+    'query'
+  );
+
+  $rows = array();
+  foreach($urls as $url) {
+    $this_domain_page_url = $base_url . '/' . $url;
+    $domain_compared_with_page_url = TSITAATCOM_COMPARE_WITH . '/' . $url;
+    $this_domain_page_html = file_get_contents($this_domain_page_url);
+    $domain_compared_with_page_html = file_get_contents($domain_compared_with_page_url);
+    $rows[] = _tsitaatcom_crawl_and_compare_title($this_domain_page_html, $domain_compared_with_page_html, 'title');
+  }
+
+  return theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+  ));
+}
+
+function _tsitaatcom_crawl_and_compare_title($this_domain_page_html, $domain_compared_with_page_html, $query) {
+  $result1 = select_elements($query, $this_domain_page_html);
+  $result2 = select_elements($query, $domain_compared_with_page_html);
+  return array(
+    'data' => array(
+      $result1[0]['text'],
+      $result2[0]['text'],
+      $query,
+    ),
+    'style' => $result1[0]['text'] !== $result2[0]['text'] ? array('background: #ff8f8f; color: black') : array('background: #3bca60; color: black'),
+  );
+}
