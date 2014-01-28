@@ -35,31 +35,40 @@ function _tsitaatcom_crawl_and_compare() {
 
   drupal_set_message("Add to .htaccess if script can't access url: AuthUserFile /var/www/tsitaat/dev/.htpasswd\nAuthType Basic\nAuthName \"Tsitaat Dev\\nRequire valid-user\nOrder allow,deny\nAllow from localhost\nAllow from 130.255.185.7\nSatisfy Any", 'status');
 
-  $urls = array(
-    '',
-    'tsitaadid/autorid/a/',
-    'tsitaadid/autorid/gunnar_aarma',
-    'tsitaadid/autorid/gunnar_aarma/11783',
-    'tsitaadid/autorid/johann_wolfgang_von_goethe',
-    'tsitaadid/autorid/winston_churchill',
-    'tsitaadid/teemad/a/',
-    'tsitaadid/teemad/aare',
-    'tsitaadid/top-100-tsitaadid',
+  $query_basic = array(
+    'title',
+    'h1',
+  );
+
+  $path = array(
+    array('', $query_basic + array()),
+    array('tsitaadid/autorid/a/', $query_basic + array()),
+    array('tsitaadid/autorid/gunnar_aarma', $query_basic + array()),
+    array('tsitaadid/autorid/gunnar_aarma/11783', $query_basic + array()),
+    array('tsitaadid/autorid/johann_wolfgang_von_goethe', $query_basic + array()),
+    array('tsitaadid/autorid/winston_churchill', $query_basic + array()),
+    array('tsitaadid/teemad/a/', $query_basic + array()),
+    array('tsitaadid/teemad/aare', $query_basic + array()),
+    array('tsitaadid/top-100-tsitaadid', $query_basic + array()),
   );
 
   $header = array(
+    'Path',
     'Drupal',
     'www.tsitaat.com url',
     'query'
   );
 
   $rows = array();
-  foreach($urls as $url) {
-    $this_domain_page_url = $base_url . '/' . $url;
-    $domain_compared_with_page_url = TSITAATCOM_COMPARE_WITH . '/' . $url;
+  foreach($path as $data) {
+    sdpm($data);
+    $this_domain_page_url = $base_url . '/' . $data[0];
+    $domain_compared_with_page_url = TSITAATCOM_COMPARE_WITH . '/' . $data[0];
     $this_domain_page_html = file_get_contents($this_domain_page_url);
     $domain_compared_with_page_html = file_get_contents($domain_compared_with_page_url);
-    $rows[] = _tsitaatcom_crawl_and_compare_title($this_domain_page_html, $domain_compared_with_page_html, 'title');
+    foreach($data[1] as $key => $tag) {
+      $rows[] = array($data[0]) + _tsitaatcom_crawl_and_compare_title($this_domain_page_html, $domain_compared_with_page_html, $tag, '/' . $data[0]);
+    }
   }
 
   return theme('table', array(
@@ -68,11 +77,12 @@ function _tsitaatcom_crawl_and_compare() {
   ));
 }
 
-function _tsitaatcom_crawl_and_compare_title($this_domain_page_html, $domain_compared_with_page_html, $query) {
+function _tsitaatcom_crawl_and_compare_title($this_domain_page_html, $domain_compared_with_page_html, $query, $path) {
   $result1 = select_elements($query, $this_domain_page_html);
   $result2 = select_elements($query, $domain_compared_with_page_html);
   return array(
     'data' => array(
+      $path,
       $result1[0]['text'],
       $result2[0]['text'],
       $query,
