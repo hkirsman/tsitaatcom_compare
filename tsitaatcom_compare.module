@@ -47,6 +47,7 @@ function _tsitaatcom_crawl_and_compare() {
     array('tsitaadid/autorid/gunnar_aarma', $query_basic + array()),
     array('tsitaadid/autorid/gunnar_aarma/11783', $query_basic + array()),
     array('tsitaadid/autorid/johann_wolfgang_von_goethe', $query_basic + array()),
+    array('tsitaadid/autorid/a._h._tammsaare', $query_basic + array()),
     array('tsitaadid/autorid/winston_churchill', $query_basic + array()),
     array('tsitaadid/teemad/a/', $query_basic + array()),
     array('tsitaadid/teemad/aare', $query_basic + array()),
