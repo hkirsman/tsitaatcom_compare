@@ -38,6 +38,7 @@ function _tsitaatcom_crawl_and_compare() {
   $query_basic = array(
     'title',
     'h1',
+    'p.h1'
   );
 
   $path = array(
@@ -61,7 +62,7 @@ function _tsitaatcom_crawl_and_compare() {
 
   $rows = array();
   foreach($path as $data) {
-    sdpm($data);
+    // sdpm($data);
     $this_domain_page_url = $base_url . '/' . $data[0];
     $domain_compared_with_page_url = TSITAATCOM_COMPARE_WITH . '/' . $data[0];
     $this_domain_page_html = file_get_contents($this_domain_page_url);
@@ -80,6 +81,7 @@ function _tsitaatcom_crawl_and_compare() {
 function _tsitaatcom_crawl_and_compare_title($this_domain_page_html, $domain_compared_with_page_html, $query, $path) {
   $result1 = select_elements($query, $this_domain_page_html);
   $result2 = select_elements($query, $domain_compared_with_page_html);
+
   return array(
     'data' => array(
       $path,
