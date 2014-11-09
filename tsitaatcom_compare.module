@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Main module file for tsitaatcom_compare.
+ */
+
 define('TSITAATCOM_COMPARE_WITH', 'http://www.tsitaat.com');
 
 /**
@@ -18,9 +23,7 @@ function tsitaatcom_compare_menu() {
 }
 
 /**
- * Admin/filter-phpbb-users page callback.
- *
- * 7549 hetkel viimane kasutaja.
+ * Admin/tsitaatcom_compare page callback.
  */
 function _tsitaatcom_compare_page() {
   $out = 'foo';
@@ -29,6 +32,12 @@ function _tsitaatcom_compare_page() {
   return $out;
 }
 
+/**
+ * Do the checking of basic pages and compare data.
+ *
+ * @return string
+ *   HTML table of all the data.
+ */
 function _tsitaatcom_crawl_and_compare() {
   global $base_url;
   $out = '';
@@ -38,7 +47,7 @@ function _tsitaatcom_crawl_and_compare() {
   $query_basic = array(
     'title',
     'h1',
-    'p.h1'
+    'p.h1',
   );
 
   $path = array(
@@ -56,20 +65,20 @@ function _tsitaatcom_crawl_and_compare() {
 
   $header = array(
     'Path',
-    'Drupal',
-    'www.tsitaat.com url',
-    'query'
+    str_replace(array('http://', 'http://'), '', $base_url),
+    'www.tsitaat.com',
+    'query',
   );
 
   $rows = array();
-  foreach($path as $data) {
+  foreach ($path as $data) {
     // sdpm($data);
     $this_domain_page_url = $base_url . '/' . $data[0];
     $domain_compared_with_page_url = TSITAATCOM_COMPARE_WITH . '/' . $data[0];
-    $this_domain_page_html = file_get_contents($this_domain_page_url);
+    $this_domain_page_html = @file_get_contents($this_domain_page_url);
     $domain_compared_with_page_html = file_get_contents($domain_compared_with_page_url);
-    foreach($data[1] as $key => $tag) {
-      $rows[] = array($data[0]) + _tsitaatcom_crawl_and_compare_title($this_domain_page_html, $domain_compared_with_page_html, $tag, '/' . $data[0]);
+    foreach ($data[1] as $key => $tag) {
+      $rows[] = array($data[0]) + _tsitaatcom_crawl_and_compare_helper($this_domain_page_html, $domain_compared_with_page_html, $tag, '/' . $data[0]);
     }
   }
 
@@ -79,17 +88,27 @@ function _tsitaatcom_crawl_and_compare() {
   ));
 }
 
-function _tsitaatcom_crawl_and_compare_title($this_domain_page_html, $domain_compared_with_page_html, $query, $path) {
+/**
+ * Compare 2 dom elements.
+ */
+function _tsitaatcom_crawl_and_compare_helper($this_domain_page_html, $domain_compared_with_page_html, $query, $path) {
   $result1 = select_elements($query, $this_domain_page_html);
   $result2 = select_elements($query, $domain_compared_with_page_html);
+
+  if (!empty($result1)) {
+    $style = $result1[0]['text'] !== $result2[0]['text'] ? array('background: #ff8f8f; color: black') : array('background: #3bca60; color: black');
+  }
+  else {
+    $style = array('background: #ff8f8f; color: black');
+  }
 
   return array(
     'data' => array(
       $path,
-      $result1[0]['text'],
-      $result2[0]['text'],
+      !empty($result1) ? $result1[0]['text'] : '',
+      !empty($result2) ? $result2[0]['text'] : '',
       $query,
     ),
-    'style' => $result1[0]['text'] !== $result2[0]['text'] ? array('background: #ff8f8f; color: black') : array('background: #3bca60; color: black'),
+    'style' => $style,
   );
 }
